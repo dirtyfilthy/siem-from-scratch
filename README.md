@@ -10,7 +10,7 @@ This project is designed to be run is a UNIX-like environment such as Linux, BSD
 
 * wget
 * openssl
-
+* vagrant
 
 ## QUICKSTART
 
