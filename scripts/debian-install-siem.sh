@@ -232,29 +232,6 @@ systemctl start logstash.service
 echo
 echo "################################################"
 echo "#                                               "
-echo "# INSTALL AUDITBEAT "                        
-echo "#                                               "
-echo "################################################"
-
-echo [+] install auditbeat-${ELKVERSION}-amd64.deb
-
-dpkg -i /vagrant/resources/auditbeat-${ELKVERSION}-amd64.deb
-
-echo [+] copy auditbeat config
-cp -r /vagrant/conf/auditbeat/*	/etc/auditbeat/
-
-echo [+] setup auditbeat template
-auditbeat setup --index-management -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
-	-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' -E "setup.ilm.overwrite=true"
-
-echo [+] setup auditbeat dashboards
-auditbeat setup --dashboards -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
-	-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' \
-	-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
-
-echo
-echo "################################################"
-echo "#                                               "
 echo "# INSTALL FILEBEAT "                        
 echo "#                                               "
 echo "################################################"
@@ -270,10 +247,12 @@ echo [+] setup filebeat template
 filebeat setup --index-management -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
 	-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' -E "setup.ilm.overwrite=true"
 
-echo [+] setup filebeat dashboards
-filebeat setup --dashboards -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
-	-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' \
-	-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
+if [ "$INSTALL_DASHBOARDS" = "true" ]; then
+	echo [+] setup filebeat dashboards
+	filebeat setup --dashboards -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
+		-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' \
+		-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
+fi
 
 echo
 echo "################################################"
@@ -293,10 +272,12 @@ echo [+] setup packetbeat template
 packetbeat setup --index-management -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
 	-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' -E "setup.ilm.overwrite=true"
 
-echo [+] setup packetbeat dashboards
-packetbeat setup --dashboards -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
-	-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' \
-	-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
+if [ "$INSTALL_DASHBOARDS" = "true" ]; then
+	echo [+] setup packetbeat dashboards
+	packetbeat setup --dashboards -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
+		-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' \
+		-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
+fi
 
 echo
 echo "################################################"
@@ -321,27 +302,61 @@ echo [+] install index template
 curl -s -u "elastic:Password1" -X PUT "https://${SIEM_IP}:9200/_template/winlogbeat-${ELKVERSION}"  -H 'Content-Type: application/json' \
 	--data-binary @/vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json
 
-echo [+] copy $WINLOGZIP to /tmp
-cp /vagrant/resources/$WINLOGZIP /tmp
+echo [+] create index alias 
 
-echo [+] installing unzip
-yes | apt install unzip
+curl -s -u "elastic:Password1" -X PUT "https://${SIEM_IP}:9200/%3Cwinlogbeat-${ELKVERSION}-%7Bnow%2Fd%7D-000001%3E"  \
+	-H 'Content-Type: application/json' -d "{\"aliases\":{\"winlogbeat-${ELKVERSION}\":{\"is_write_index\":true}}}"
 
-echo [+] unzipping $WINLOGZIP
-
-(cd /tmp && unzip $WINLOGZIP)
+if [ "$INSTALL_DASHBOARDS" = "true" ]; then
 
 
-echo [+] setup winlogbeat dashboards
+	echo [+] copy $WINLOGZIP to /tmp
+	cp /vagrant/resources/$WINLOGZIP /tmp
 
-(
-	cd /tmp/$WINLOGBEAT
+	echo [+] installing unzip
+	yes | apt-get install unzip
 
+	echo [+] unzipping $WINLOGZIP
+
+	(cd /tmp && unzip $WINLOGZIP)
+
+	echo [+] setup winlogbeat dashboards
+
+	(
+		cd /tmp/$WINLOGBEAT
+
+		auditbeat setup --dashboards -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
+			-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' \
+			-E "setup.kibana.host=\"https://$SIEM_IP:5601\""  -E setup.dashboards.directory=kibana
+
+	)
+fi
+
+echo
+echo "################################################"
+echo "#                                               "
+echo "# INSTALL AUDITBEAT "                        
+echo "#                                               "
+echo "################################################"
+
+echo [+] install auditbeat-${ELKVERSION}-amd64.deb
+
+dpkg -i /vagrant/resources/auditbeat-${ELKVERSION}-amd64.deb
+
+echo [+] copy auditbeat config
+cp -r /vagrant/conf/auditbeat/*	/etc/auditbeat/
+
+echo [+] setup auditbeat template
+auditbeat setup --index-management -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
+	-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' -E "setup.ilm.overwrite=true"
+
+
+if [ "$INSTALL_DASHBOARDS" = "true" ]; then
+	echo [+] setup auditbeat dashboards
 	auditbeat setup --dashboards -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
 		-E 'output.elasticsearch.username="elastic"' -E 'output.elasticsearch.password="Password1"' \
-		-E "setup.kibana.host=\"https://$SIEM_IP:5601\""  -E setup.dashboards.directory=kibana
-
-)
+		-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
+fi
 
 echo
 echo "################################################"

@@ -6,6 +6,7 @@ ROOTCERT=/vagrant/certs/myca/myCA.crt
 ELASTICSEARCH_P12=/vagrant/certs/siem/elastic-certificates.p12
 ELASTICSEARCH_KEY=/vagrant/certs/siem/elastic-certificates.key
 ELASTICSEARCH_CRT=/vagrant/certs/siem/elastic-certificates.crt
+INSTALL_DASHBOARDS=false
 
 ## OTHER GLOBALS -- DON'T CHANGE
 
