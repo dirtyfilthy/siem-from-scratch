@@ -308,13 +308,18 @@ echo "################################################"
 WINLOGBEAT=winlogbeat-${ELKVERSION}-windows-x86_64
 WINLOGZIP=${WINLOGBEAT}.zip
 
-echo [+] generate index template
-auditbeat export template -E setup.template.pattern=winlogbeat-${ELKVERSION}-* > /tmp/winlogbeat.template.json
+if ! [ -f /vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json ]; then
+	echo "[!] /vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json does not exist"
+	echo "[!] you need to generate it by running:"
+	echo "[!] .\winlogbeat.exe export template --es.version ${ELKVERSION} | Out-File -Encoding UTF8 /vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json"
+	echo "[!] from powershell on a windows machine from the winlogbeat installation directory"
+	exit 1
+fi
 
 echo [+] install index template
 
 curl -s -u "elastic:Password1" -X PUT "https://${SIEM_IP}:9200/_template/winlogbeat-${ELKVERSION}"  -H 'Content-Type: application/json' \
-	--data-binary @/tmp/winlogbeat.template.json
+	--data-binary @/vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json
 
 echo [+] copy $WINLOGZIP to /tmp
 cp /vagrant/resources/$WINLOGZIP /tmp

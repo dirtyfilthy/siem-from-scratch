@@ -97,6 +97,22 @@ The VagrantFile will perform the following actions:
 	* ./scripts/debian-upgrade.sh -- update package lists from repositories and upgrade
 
 
+## GOTCHAS
+
+### STATICALLY BUNDLED WINLOGBEAT INDEX TEMPLATE
+
+Currently there is no way of generating the winlogbeat index template from within linux so it is bundled statically. If you change ELKVERSION you will need to regenerate this file by running the following commands within powershell:
+
+    $VERSION=7.9.0
+    .\winlogbeat.exe export template --es.version $VERSION | Out-File -Encoding UTF8 "/vagrant/conf/winlogbeat/winlogbeat-$VERSION.template.json"
+
+replacing the 7.9.0 on the $VERSION= line with your ELK version.
+
+You should the generated template file copy this file to ./conf/winlogbeat/
+
+
+
+
 
 
 
