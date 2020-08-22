@@ -109,7 +109,7 @@ Currently there is no way of generating the winlogbeat index template from withi
 
 replacing the 7.9.0 on the $VERSION= line with your ELK version.
 
-You should the generated template file copy this file to ./conf/winlogbeat/
+You should copy the generated template file to ./conf/winlogbeat/
 
 
 
