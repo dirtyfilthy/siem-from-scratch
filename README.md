@@ -91,7 +91,7 @@ Include the following lines within the "Vagrant.configure("2") do |config|" sect
         end
     end
 
-You can base copy this from the example VagrantFile in the project directory. A more granular example VagrantFile is provided at "VagrantFile.verbose" if you need more control over the provisioning process.
+You can copy this from the example VagrantFile in the project directory. A more granular example VagrantFile is provided at "VagrantFile.verbose" if you need more control over the provisioning process.
 
 ## Beats Agents
 
