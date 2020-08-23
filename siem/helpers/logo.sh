@@ -12,7 +12,7 @@ VMMMP" dMP dMMMMMP dMP dMP dMP        dMP     dMP dMP  VMMMP" dMP dMP dMP
 dP .dMP dMP.aMP dMP"AMF dMP dMP   dMP   dMP.aMP dMP dMP    
 VMMMP"  VMMMP" dMP dMP dMP dMP   dMP    VMMMP" dMP dMP     
 
-v0.1 -- Caleb Anderson dirtyfilthee@gmail.com
+v0.1.0 INITIAL RELEASE 2020-08-24 -- Caleb Anderson dirtyfilthee@gmail.com
 
-                                                           
+
 '

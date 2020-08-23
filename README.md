@@ -11,7 +11,7 @@
     dP .dMP dMP.aMP dMP"AMF dMP dMP   dMP   dMP.aMP dMP dMP    
     VMMMP"  VMMMP" dMP dMP dMP dMP   dMP    VMMMP" dMP dMP     
 
-    v0.1 -- Caleb Anderson dirtyfilthee@gmail.com
+    v0.1.0 INITIAL RELEASE 2020-08-24 -- Caleb Anderson dirtyfilthee@gmail.com
 
 This project creates a drop in ELK SIEM component for use in a infosec redteam lab. It will install the ELK stack, register a trial, create TLS certificates, setup users, setup beat index templates etc etc. (see "Activities"). This is not designed to replace the excellent DetectionLab (https://github.com/clong/DetectionLab), but instead provide an easy to use, low configuration, drop-in component you can integrate into existing labs or use as part of custom redteam scenarios. 
 
@@ -209,6 +209,12 @@ Unlike other beat shippers, currently there is no way of generating the winlogbe
 replacing the 7.9.0 on the $VERSION= line with your ELK version.
 
 You should copy the generated template file to ./conf/winlogbeat/
+
+## TODO
+
+* Support for more data sources, EDRs etc with associated installers
+* Custom detection rules
+* ... your idea here? Get in touch!
 
 ## Contact
 

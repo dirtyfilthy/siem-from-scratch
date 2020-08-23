@@ -29,7 +29,7 @@ check_kibana(){
 wait_for_kibana(){
 	TIMEOUT=$1
 	STARTTIME=$(date +%s)
-	echo "[?] waiting for kibana to start"
+	echo "[?] waiting for kibana to start (normally under 60 seconds)"
 	while ! check_kibana; do
 		CURRENTTIME=$(date +%s)
 		ELAPSED=$(expr $CURRENTTIME - $STARTTIME)
