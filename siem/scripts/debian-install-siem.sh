@@ -17,6 +17,42 @@ get_userpass(){
 	cat $PASSFILE | grep "PASSWORD $USER" | cut -f 2 -d "=" | tr -d " "
 }
 
+check_kibana(){
+	if curl -s -I -u elastic:Password1 -X GET https://$SIEM_IP:5601/api/features | grep -q "HTTP/1.1 200 OK"; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+
+wait_for_kibana(){
+	TIMEOUT=$1
+	STARTTIME=$(date +%s)
+	echo "[?] waiting for kibana to start"
+	while ! check_kibana; do
+		CURRENTTIME=$(date +%s)
+		ELAPSED=$(expr $CURRENTTIME - $STARTTIME)
+		if [ $ELAPSED -gt $TIMEOUT ]; then
+			return 1
+		fi
+		echo "[+] waited $ELAPSED seconds, sleeping"
+		sleep 1
+	done
+	return 0
+
+}
+
+echo " "
+echo "################################################"
+echo "#                                               "
+echo "# PREFLIGHT "                        
+echo "#                                               "
+echo "################################################"
+echo " "
+
+echo "[?] checking for arguments..."
+
 if [ -z "$SIEM_IP" ] || [ -z "$SIEM_CN" ]; then
 	echo "[!] ERROR: this provisioning script requires both the SIEM IP and SIEM hostname arguments to function!"
 	echo "[!] either pass the \"args\" parameter with the SIEM_IP and SIEM_CN variables or directly"
@@ -32,28 +68,26 @@ if [ -z "$SIEM_IP" ] || [ -z "$SIEM_CN" ]; then
 	exit 1
 fi
 
-echo "################################################"
-echo "#                                               "
-echo "# PREFLIGHT "                        
-echo "#                                               "
-echo "################################################"
-echo
-echo "[?] running with domain: ${SIEM_CN}, IP: ${SIEM_IP}, setup local beats: ${SETUPLOCALBEATS}"
-echo "[?] ELK version ${ELKVERSION}"
-echo "[?] ROOTCERT=${ROOTCERT}"
-echo "[?] ELASTICSEARCH_P12=${ELASTICSEARCH_P12}"
-echo "[?] ELASTICSEARCH_KEY=${ELASTICSEARCH_KEY}"
-echo "[?] ELASTICSEARCH_CRT=${ELASTICSEARCH_CRT}"
+echo "[?] running with domain: ${SIEM_CN}, IP: ${SIEM_IP}"
+echo "[?] "
+
+VARIABLES="ELKVERSION ROOTCERT ELASTICSEARCH_P12 ELASTICSEARCH_KEY ELASTICSEARCH_CRT SETUPLOCALBEATS INSTALL_DASHBOARDS"
+echo "[?] settings: "
+echo "[?] "
+for VARIABLE in $VARIABLES; do
+	eval VALUE="\$$VARIABLE"
+	printf "[?] %-20s = %s\n" $VARIABLE $VALUE
+done
 
 ### SCRIPT
 
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# INSTALL ELASTICSEARCH "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo [+] install elasticsearch-${ELKVERSION}-amd64.deb
 dpkg -i /vagrant/siem/resources/elasticsearch-${ELKVERSION}-amd64.deb
 
@@ -128,13 +162,13 @@ curl -k -s --user elastic:$ELASTICPW -X POST "https://$SIEM_IP:9200/_security/us
   "password" : "Password1"
 }
 '
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# INSTALL KIBANA "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo [+] install kibana-${ELKVERSION}-amd64.deb
 
 dpkg -i /vagrant/siem/resources/kibana-${ELKVERSION}-amd64.deb
@@ -188,22 +222,20 @@ systemctl daemon-reload
 systemctl enable kibana.service
 systemctl start kibana.service
 
-echo "[?} checking if we need to wait for kibana startup to install dashboards"
-if [ "$INSTALL_DASHBOARDS" = "true" ]; then
-	echo "[!] dashboards are being installed"
-	echo [+] waiting for 60 seconds for kibana to start...
-	sleep 60
-else
-	echo "[!] dashboards not being installed, skipping sleep"
+KIBANA_TIMEOUT=120
+if ! wait_for_kibana $KIBANA_TIMEOUT; then
+	echo "[!] ERROR: waited $KIBANA_TIMEOUT seconds and kibana still hasn't started"
+	echo "[!] exiting... "
+	exit 1
 fi
 
-echo 
+echo " " 
 echo "################################################"
 echo "#                                               "
 echo "# INSTALL LOGSTASH "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo [+] install logstash-${ELKVERSION}.deb
 
 dpkg -i /vagrant/siem/resources/logstash-${ELKVERSION}.deb
@@ -254,13 +286,13 @@ systemctl daemon-reload
 systemctl enable logstash.service
 systemctl start logstash.service
 
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# INSTALL FILEBEAT "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo [+] install filebeat-${ELKVERSION}-amd64.deb
 
 dpkg -i /vagrant/siem/resources/filebeat-${ELKVERSION}-amd64.deb
@@ -279,13 +311,13 @@ if [ "$INSTALL_DASHBOARDS" = "true" ]; then
 		-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
 fi
 
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# INSTALL PACKETBEAT "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo [+] install packetbeat-${ELKVERSION}-amd64.deb
 
 dpkg -i /vagrant/siem/resources/packetbeat-${ELKVERSION}-amd64.deb
@@ -304,13 +336,13 @@ if [ "$INSTALL_DASHBOARDS" = "true" ]; then
 		-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
 fi
 
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# INSTALL WINLOGBEAT "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 WINLOGBEAT=winlogbeat-${ELKVERSION}-windows-x86_64
 WINLOGZIP=${WINLOGBEAT}.zip
 
@@ -357,13 +389,13 @@ if [ "$INSTALL_DASHBOARDS" = "true" ]; then
 	)
 fi
 
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# INSTALL AUDITBEAT "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo [+] install auditbeat-${ELKVERSION}-amd64.deb
 
 dpkg -i /vagrant/siem/resources/auditbeat-${ELKVERSION}-amd64.deb
@@ -383,13 +415,13 @@ if [ "$INSTALL_DASHBOARDS" = "true" ]; then
 		-E "setup.kibana.host=\"https://$SIEM_IP:5601\""
 fi
 
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# CONFIGURE SIEM "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo "[+] install 'jq' json tool"
 apt-get -y install jq
 
@@ -424,13 +456,13 @@ echo [+] set SIEM as homepage
 curl -s -u "elastic:Password1" -X POST "https://${SIEM_IP}:5601/api/kibana/settings" \
 	-d '{"changes":{"defaultRoute":"/app/security/overview"}}' -H 'kbn-xsrf: true' -H 'Content-Type: application/json'
 
-echo
+echo " "
 echo "################################################"
 echo "#                                               "
 echo "# POST SETUP "                        
 echo "#                                               "
 echo "################################################"
-
+echo " "
 echo "[?] starting local beats services... ${SETUPLOCALBEATS}"
 echo
 if [ "$SETUPLOCALBEATS" = "true" ]; then
@@ -455,9 +487,9 @@ echo "[!] >>> Username:    elastic"
 echo "[!] >>> Password:    Password1"
 echo "[!] "
 echo "[!] Happy Hunting!"
-echo "."
-echo "."
-echo "."
+echo " "
+echo " "
+echo " "
 
 
 

@@ -20,6 +20,14 @@ if [ -z "$SIEM_IP" ] || [ -z "$SIEM_CN" ]; then
 	exit 1
 fi
 
+echo " "
+echo "################################################"
+echo "#                                               "
+echo "# CERT CHECK "                        
+echo "#                                               "
+echo "################################################"
+echo " "
+
 echo "[+] checking certs..."
 
 if [ "$ROOTCERT" != "$DEFAULT_ROOTCERT" ] && ! [ -f "$ROOTCERT" ]; then

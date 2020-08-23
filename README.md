@@ -160,6 +160,7 @@ The VagrantFile will perform the following actions:
     	* get-resources.sh -- download needed files such as .deb packages
     	* make-clean.sh -- delete resources and generated certs
         * update-powershell-conf.sh -- generate powershell config.ps1 variable include file from siem/conf/siem/config.sh
+        * logo.sh -- every great tool starts life as a figlet logo
     * scripts/
     	* debian-check-siem-certs.sh -- check siem certs for sanity
     	* debian-check-siem-resources.sh -- check for resources and download if required

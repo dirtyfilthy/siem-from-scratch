@@ -1,4 +1,12 @@
 #!/bin/sh
+echo " "
+echo "################################################"
+echo "#                                               "
+echo "# INSTALL JAVA 11"                        
+echo "#                                               "
+echo "################################################"
+echo " "
+
 echo [+] adding repository
 add-apt-repository ppa:openjdk-r/ppa
 echo [+] updating

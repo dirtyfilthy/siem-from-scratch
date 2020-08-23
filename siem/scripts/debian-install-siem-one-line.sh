@@ -9,6 +9,10 @@
 SIEM_CN=$1
 SIEM_IP=$2
 
+# every great tool starts life as a figlet logo
+
+/vagrant/siem/helpers/logo.sh
+
 if [ -z "$SIEM_IP" ] || [ -z "$SIEM_CN" ]; then
 	echo "[!] ERROR: this provisioning script requires both the SIEM IP and SIEM hostname arguments to function!"
 	echo "[!] either pass the \"args\" parameter with the SIEM_IP and SIEM_CN variables or directly"
