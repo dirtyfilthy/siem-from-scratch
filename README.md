@@ -13,9 +13,6 @@
 
     v0.1 -- Caleb Anderson dirtyfilthee@gmail.com
 
-
-# SIEM FROM SCRATCH
-
 This project creates a drop in ELK SIEM component for use in a infosec redteam lab. It will install the ELK stack, register a trial, create TLS certificates, setup users, setup beat index templates etc etc. (see "Activities"). This is not designed to replace the excellent DetectionLab (https://github.com/clong/DetectionLab), but instead provide an easy to use, low configuration, drop-in component you can integrate into existing labs or use as part of custom redteam scenarios. 
 
 To create a complete lab the only thing required should be to install beats agents on boxes and point them at the SIEM. 
