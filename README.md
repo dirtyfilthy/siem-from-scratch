@@ -4,7 +4,7 @@ This project creates a drop in ELK SIEM component for use in a infosec redteam l
 
 To create a complete lab the only thing required should be to install beats agents on boxes and point them at the SIEM. 
 
-Assuming the machine images exist and the resources have already been downloaded, the SIEM takes about five minutes to provision.
+Assuming the machine image exists and the resources have already been downloaded, the SIEM itself takes about five minutes to provision.
 
 ## Prerequisites
 
