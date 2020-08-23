@@ -28,6 +28,10 @@ echo "#                                               "
 echo "################################################"
 echo " "
 
+echo "[+] ensuring openssl is installed"
+
+apt-get -y install openssl
+
 echo "[+] checking certs..."
 
 if [ "$ROOTCERT" != "$DEFAULT_ROOTCERT" ] && ! [ -f "$ROOTCERT" ]; then
