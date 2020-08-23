@@ -188,8 +188,14 @@ systemctl daemon-reload
 systemctl enable kibana.service
 systemctl start kibana.service
 
-echo [+] waiting for 60 seconds for kibana to start...
-sleep 60
+echo "[?} checking if we need to wait for kibana startup to install dashboards"
+if [ "$INSTALL_DASHBOARDS" = "true" ]; then
+	echo "[!] dashboards are being installed"
+	echo [+] waiting for 60 seconds for kibana to start...
+	sleep 60
+else
+	echo "[!] dashboards not being installed, skipping sleep"
+fi
 
 echo 
 echo "################################################"
@@ -441,6 +447,17 @@ if [ "$SETUPLOCALBEATS" = "true" ]; then
 fi
 echo 
 echo "[!] DONE! "
+echo "[!] "
+echo "[!] You can now login to the SIEM dashboard:"
+echo "[!] "
+echo "[!] >>> Dashboard:   https://${SIEM_IP}:5601/" 
+echo "[!] >>> Username:    elastic"
+echo "[!] >>> Password:    Password1"
+echo "[!] "
+echo "[!] Happy Hunting!"
+echo "."
+echo "."
+echo "."
 
 
 
