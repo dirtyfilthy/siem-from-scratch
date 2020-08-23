@@ -1,3 +1,19 @@
+
+       .dMMMb  dMP dMMMMMP dMMMMMMMMb         dMMMMMP dMMMMb  .aMMMb  dMMMMMMMMb 
+      dMP" VP amr dMP     dMP"dMP"dMP        dMP     dMP.dMP dMP"dMP dMP"dMP"dMP 
+      VMMMb  dMP dMMMP   dMP dMP dMP        dMMMP   dMMMMK" dMP dMP dMP dMP dMP  
+    dP .dMP dMP dMP     dMP dMP dMP        dMP     dMP"AMF dMP.aMP dMP dMP dMP   
+    VMMMP" dMP dMMMMMP dMP dMP dMP        dMP     dMP dMP  VMMMP" dMP dMP dMP    
+                                                                                 
+       .dMMMb  .aMMMb  dMMMMb  .aMMMb dMMMMMMP .aMMMb  dMP dMP 
+      dMP" VP dMP"VMP dMP.dMP dMP"dMP   dMP   dMP"VMP dMP dMP  
+      VMMMb  dMP     dMMMMK" dMMMMMP   dMP   dMP     dMMMMMP   
+    dP .dMP dMP.aMP dMP"AMF dMP dMP   dMP   dMP.aMP dMP dMP    
+    VMMMP"  VMMMP" dMP dMP dMP dMP   dMP    VMMMP" dMP dMP     
+
+    v0.1 -- Caleb Anderson dirtyfilthee@gmail.com
+
+
 # SIEM FROM SCRATCH
 
 This project creates a drop in ELK SIEM component for use in a infosec redteam lab. It will install the ELK stack, register a trial, create TLS certificates, setup users, setup beat index templates etc etc. (see "Activities"). This is not designed to replace the excellent DetectionLab (https://github.com/clong/DetectionLab), but instead provide an easy to use, low configuration, drop-in component you can integrate into existing labs or use as part of custom redteam scenarios. 
