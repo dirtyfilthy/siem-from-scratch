@@ -1,7 +1,9 @@
+#!/bin/sh
+
 SIEM_CN=$1
 SIEM_IP=$2
 
-. /vagrant/conf/siem/config.sh
+. /vagrant/siem/conf/siem/config.sh
 
 echo "[+] checking certs..."
 
@@ -42,13 +44,13 @@ fi
 
 if [ "$ROOTCERT" = "$DEFAULT_ROOTCERT" ] && ! [ -f "$ROOTCERT" ]; then
 	echo "[!] default rootcert $ROOTCERT does not exist, creating"
-	/vagrant/helpers/make-ca.sh
+	/vagrant/siem/helpers/make-ca.sh
 fi
 
 if [ "$ELASTICSEARCH_P12" = "$DEFAULT_ELASTICSEARCH_P12" ] && ! [ -f "$ELASTICSEARCH_P12" ]; then
 	echo "[!] missing default elastic-certificates.p12, generating..."
 	echo [+] creating certs/siem/elastic-certificates.p12
-	/vagrant/helpers/create-lab-cert.sh $SIEM_CN $SIEM_IP /vagrant/certs/siem/elastic-certificates
+	/vagrant/siem/helpers/create-lab-cert.sh $SIEM_CN $SIEM_IP /vagrant/siem/certs/siem/elastic-certificates
 fi
 
-/vagrant/scripts/debian-install-root-cert.sh $ROOTCERT
+/vagrant/siem/scripts/debian-install-root-cert.sh $ROOTCERT

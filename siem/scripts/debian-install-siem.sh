@@ -1,4 +1,8 @@
-. /vagrant/conf/siem/config.sh
+#!/bin/sh
+
+### CONFIG
+
+. /vagrant/siem/conf/siem/config.sh
 
 ### PARAMS
 
@@ -36,10 +40,10 @@ echo "#                                               "
 echo "################################################"
 
 echo [+] install elasticsearch-${ELKVERSION}-amd64.deb
-dpkg -i /vagrant/resources/elasticsearch-${ELKVERSION}-amd64.deb
+dpkg -i /vagrant/siem/resources/elasticsearch-${ELKVERSION}-amd64.deb
 
 echo [+] copy elasticsearch configuration
-cp /vagrant/conf/elasticsearch/* /etc/elasticsearch
+cp /vagrant/siem/conf/elasticsearch/* /etc/elasticsearch
 
 echo [+] start elastic service
 systemctl daemon-reload
@@ -118,10 +122,10 @@ echo "################################################"
 
 echo [+] install kibana-${ELKVERSION}-amd64.deb
 
-dpkg -i /vagrant/resources/kibana-${ELKVERSION}-amd64.deb
+dpkg -i /vagrant/siem/resources/kibana-${ELKVERSION}-amd64.deb
 
 echo [+] copy config
-cp -r /vagrant/conf/kibana/* /etc/kibana
+cp -r /vagrant/siem/conf/kibana/* /etc/kibana
 
 echo [+] create kibana /var/log directory
 
@@ -143,7 +147,7 @@ echo "elasticsearch.username: \"kibana_system\"" >> /etc/kibana/kibana.yml
 echo "elasticsearch.password: \"$KIBANAPW\"" >> /etc/kibana/kibana.yml
 
 echo [+] enable kibana TLS
-cp /vagrant/certs/siem/elastic-certificates.p12 /usr/share/elasticsearch/
+cp /vagrant/siem/certs/siem/elastic-certificates.p12 /usr/share/elasticsearch/
 chmod +r /usr/share/elasticsearch/elastic-certificates.p12
 echo 'server.ssl.keystore.path: "/usr/share/elasticsearch/elastic-certificates.p12"' >> /etc/kibana/kibana.yml
 echo 'server.ssl.enabled: true' >> /etc/kibana/kibana.yml
@@ -181,14 +185,14 @@ echo "################################################"
 
 echo [+] install logstash-${ELKVERSION}.deb
 
-dpkg -i /vagrant/resources/logstash-${ELKVERSION}.deb
+dpkg -i /vagrant/siem/resources/logstash-${ELKVERSION}.deb
 
 echo [+] copy logstash config
-cp -r /vagrant/conf/logstash/*	/etc/logstash/
+cp -r /vagrant/siem/conf/logstash/*	/etc/logstash/
 
 echo [+] fix missing logstash ca-bundle.crt
 mkdir -p /etc/pki/tls/certs/
-cp /vagrant/resources/ca-bundle.crt /etc/pki/tls/certs/
+cp /vagrant/siem/resources/ca-bundle.crt /etc/pki/tls/certs/
 
 echo [+] create logstash_writer role
 curl -s --user elastic:Password1 -X POST "https://$SIEM_IP:9200/_xpack/security/role/logstash_writer" -H 'Content-Type: application/json' -d'
@@ -238,10 +242,10 @@ echo "################################################"
 
 echo [+] install filebeat-${ELKVERSION}-amd64.deb
 
-dpkg -i /vagrant/resources/filebeat-${ELKVERSION}-amd64.deb
+dpkg -i /vagrant/siem/resources/filebeat-${ELKVERSION}-amd64.deb
 
 echo [+] copy filebeat config
-cp -r /vagrant/conf/filebeat/*	/etc/filebeat/
+cp -r /vagrant/siem/conf/filebeat/*	/etc/filebeat/
 
 echo [+] setup filebeat template
 filebeat setup --index-management -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
@@ -263,10 +267,10 @@ echo "################################################"
 
 echo [+] install packetbeat-${ELKVERSION}-amd64.deb
 
-dpkg -i /vagrant/resources/packetbeat-${ELKVERSION}-amd64.deb
+dpkg -i /vagrant/siem/resources/packetbeat-${ELKVERSION}-amd64.deb
 
 echo [+] copy packetbeat config
-cp -r /vagrant/conf/packetbeat/*	/etc/packetbeat/
+cp -r /vagrant/siem/conf/packetbeat/*	/etc/packetbeat/
 
 echo [+] setup packetbeat template
 packetbeat setup --index-management -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
@@ -289,10 +293,10 @@ echo "################################################"
 WINLOGBEAT=winlogbeat-${ELKVERSION}-windows-x86_64
 WINLOGZIP=${WINLOGBEAT}.zip
 
-if ! [ -f /vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json ]; then
-	echo "[!] /vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json does not exist"
+if ! [ -f /vagrant/siem/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json ]; then
+	echo "[!] /vagrant/siem/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json does not exist"
 	echo "[!] you need to generate it by running:"
-	echo "[!] .\winlogbeat.exe export template --es.version ${ELKVERSION} | Out-File -Encoding UTF8 /vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json"
+	echo "[!] .\winlogbeat.exe export template --es.version ${ELKVERSION} | Out-File -Encoding UTF8 /vagrant/siem/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json"
 	echo "[!] from powershell on a windows machine from the winlogbeat installation directory"
 	exit 1
 fi
@@ -300,7 +304,7 @@ fi
 echo [+] install index template
 
 curl -s -u "elastic:Password1" -X PUT "https://${SIEM_IP}:9200/_template/winlogbeat-${ELKVERSION}"  -H 'Content-Type: application/json' \
-	--data-binary @/vagrant/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json
+	--data-binary @/vagrant/siem/conf/winlogbeat/winlogbeat-${ELKVERSION}.template.json
 
 echo [+] create index alias 
 
@@ -311,10 +315,10 @@ if [ "$INSTALL_DASHBOARDS" = "true" ]; then
 
 
 	echo [+] copy $WINLOGZIP to /tmp
-	cp /vagrant/resources/$WINLOGZIP /tmp
+	cp /vagrant/siem/resources/$WINLOGZIP /tmp
 
 	echo [+] installing unzip
-	yes | apt-get install unzip
+	apt-get -y install unzip
 
 	echo [+] unzipping $WINLOGZIP
 
@@ -341,10 +345,10 @@ echo "################################################"
 
 echo [+] install auditbeat-${ELKVERSION}-amd64.deb
 
-dpkg -i /vagrant/resources/auditbeat-${ELKVERSION}-amd64.deb
+dpkg -i /vagrant/siem/resources/auditbeat-${ELKVERSION}-amd64.deb
 
 echo [+] copy auditbeat config
-cp -r /vagrant/conf/auditbeat/*	/etc/auditbeat/
+cp -r /vagrant/siem/conf/auditbeat/*	/etc/auditbeat/
 
 echo [+] setup auditbeat template
 auditbeat setup --index-management -E output.logstash.enabled=false -E "output.elasticsearch.hosts=[\"https://$SIEM_IP:9200\"]" \
@@ -366,7 +370,7 @@ echo "#                                               "
 echo "################################################"
 
 echo "[+] install 'jq' json tool"
-yes | apt install jq
+apt-get -y install jq
 
 echo [+] create siem signal index
 curl -s -u "elastic:Password1" -X POST "https://${SIEM_IP}:5601/api/detection_engine/index" -H 'kbn-xsrf: true'

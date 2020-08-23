@@ -1,3 +1,4 @@
+#!/bin/sh
 echo [+] updating repositories
 apt-get -y update
 echo [+] upgrading...
