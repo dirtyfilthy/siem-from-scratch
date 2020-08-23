@@ -21,11 +21,10 @@ Assuming the machine image exists and the resources have already been downloaded
 
 ## Prerequisites
 
-This project is designed to be run is a UNIX-like environment such as Linux, BSD, OS X, or at least cygwin. It requires the following tools be installed:
+As the shell scripts and necessary tools are run the created SIEM box itself, this software has limited requirements:
 
-* wget
-* openssl
-* vagrant
+* Vagrant
+* Vagrant project folder shared under "/vagrant" or "C:\Vagrant" (this is usually the case by default)
 * Internet connection
 
 The example VagrantFile is setup to work with VirtualBox but the provisioning scripts should work with any provider. 
