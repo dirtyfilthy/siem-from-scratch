@@ -57,7 +57,7 @@ Then run the "whoami" command and exit
 
 This will create an event for the SIEM to detect.
 
-Navigate to https://172.28.128.20/ in a browser and login with user "elastic" and password "Password1" (no quotes with either username or password).
+Navigate to https://172.28.128.20:5601/ in a browser and login with user "elastic" and password "Password1" (no quotes with either username or password).
 
 Click on "Detections"
 
