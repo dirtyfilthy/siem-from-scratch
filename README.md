@@ -1,8 +1,9 @@
 # SIEM FROM SCRATCH
 
-This project creates a "drop in" ELK SIEM component for use in a infosec redteam lab. It will install the ELK stack, register a trial, create TLS certificates, setup users, setup beat index templates etc etc. (see ACTIVITIES). 
+This project creates a drop in ELK SIEM component for use in a infosec redteam lab. It will install the ELK stack, register a trial, create TLS certificates, setup users, setup beat index templates etc etc. (see "Activities"). This is not designed to replace the excellent DetectionLab (https://github.com/clong/DetectionLab), but instead provide an easy to use, low configuration, drop-in component you can integrate into existing labs or use as part of custom redteam scenarios. 
 
 To create a complete lab the only thing required should be to install beats agents on boxes and point them at the SIEM.
+
 
 ## Prerequisites
 
@@ -13,17 +14,44 @@ This project is designed to be run is a UNIX-like environment such as Linux, BSD
 * vagrant
 * Internet connection
 
+The example VagrantFile is setup to work with VirtualBox but the provisioning scripts should work with any provider. 
+
 ## Quickstart
 
-Change to the toplevel directory of the project in a shell and run the following command 
+This quickstart example will start up a SIEM and one Windows box which it will monitor. You'll create a detection event and see this event get picked up in the SIEM.
+
+It is recommended to quickstart the project at least once to create the SIEM root cert and download all the resources it requires. If you then copy this "siem/" folder into your lab folders in future you will not need to re-install any certificates or re-download any resources.
+
+Take a look at the example VagrantFile in an editor. Note that it's going to create the SIEM at 172.28.128.20 and the monitored Windows server at 172.28.128.21. It's also going to install two elastic Beats agents on the Windows server and point the logging output of those agents at the SIEM.
+
+Exit the editor, then change to the toplevel directory of the project in a shell and run the following command 
 
     vagrant up
 
-Install the root certificate at siem/certs/myca/myCA.crt
+Install the created root certificate at "siem/certs/myca/myCA.crt". 
 
-Navigate to https://172.28.128.20/ in a browser and login with user "elastic" and password "Password1" (no quotes with either username or password) 
+Note this certificate is created only once (unless you delete it), and you will need to install it only once as well. If you are going to use SIEM-from-scratch in a lab, it's best to copy the whole "siem/" directory with the created certificates included, so that you don't need to keep installing root certificates over and over. 
 
-It is recommended to quickstart the project at least once to create the SIEM root cert and download all the resources. If you then copy this "siem/" folder into your labs in future you will not need to re-install any certificates or re-download any resources.
+SSH into the Windows monitored box
+
+    vagrant ssh monitored
+
+Then run the "whoami" command and exit
+
+    whoami
+    exit
+
+This will create an event for the SIEM to detect.
+
+Navigate to https://172.28.128.20/ in a browser and login with user "elastic" and password "Password1" (no quotes with either username or password).
+
+Click on "Detections"
+
+You should see a "Whoami Process Event" in the Trends and in the alerts table below. Note that the detection rule runs every five minutes, so you may need to wait a few minutes and hit the "Refresh" button to see it appear.
+
+
+More information on the elastic SIEM is available here https://www.elastic.co/guide/en/siem/guide/current/index.html
+
 
 ## Lab Use
 
@@ -51,19 +79,32 @@ Include the following lines within the "Vagrant.configure("2") do |config|" sect
 
 You can base copy this from the example VagrantFile in the project directory. A more granular example VagrantFile is provided at "VagrantFile.verbose" if you need more control over the provisioning process.
 
+## Beats Agents
+
+Beats are the datashippers for the siem. The SIEM is configured to accept logstash input from beats agents on SIEM_IP:5044, no encryption is configured. More information about beats can be found at https://www.elastic.co/beats/
+
+For convenience, a number of Windows and Debian Beats agent install scripts are provided under "siem/installers". These include installers for auditbeat, packetbeat and filebeat; and the windows only winlogbeat. Each provision script takes one argument, the IP of the SIEM. 
+
+The auditbeat and winlogbeat installers should work without further configuration, as will the debian packetbeat installer. Packetbeat may require configuration of the interface under Windows, edit the "siem/conf/packetbeat/packetbeat-win.yml" file to configure this. Filebeat should mostly work under Debian but Windows will need to edit the "siem/conf/filebeat/filebeat-win.yml" file to point the location of logfiles.
+
+The Windows installers presume the use of powershell and the Vagrant WinRM communicator.
+
+To use an installer add a line like the following in to your Vagrant machine definition in the 'config.vm.define "machine" do cfg' section:
+
+    cfg.vm.provision "shell", path: "siem/installers/windows-install-winlogbeat.ps1", args: "172.28.128.20"
+
+changing "172.28.128.20" to the IP of your SIEM 
+
 ### Root Certificate
 
 The first time "vagrant up" is run, a root cert will be created in "siem/certs/myca/myCA.crt". You'll need to install this locally on whatever machine you are using to access the Kibana SIEM dashboard. 
 
 ### SIEM Dashboard
 
-The dashboard will become available on https://SIEMIP:5601/
+The dashboard will become available on https://SIEM_IP:5601/
 
-The username and password is elastic / Password1
+The default username and password is elastic / Password1
 
-## Beats Agents
-
-Beats are the datashippers for the siem. The SIEM is configured to accept logstash input from beats agents on SIEMIP:5044, no encryption is configured. More information about beats can be found at https://www.elastic.co/beats/
 
 ## Configuration
 
@@ -125,6 +166,14 @@ The VagrantFile will perform the following actions:
     	* debian-install-root-cert.sh -- install a root certificate
     	* debian-install-siem.sh -- install and configure the majority of components (see ACTIVITIES)
     	* debian-upgrade.sh -- update package lists from repositories and upgrade
+    * installers/
+        * debian-install-auditbeat.sh -- Debian auditbeat installer
+        * debian-install-filebeat.sh -- Debian filebeat installer
+        * debian-install-packetbeat.sh -- Debian packetbeat installer
+        * windows-install-winlogbeat.ps1 -- Windows winlogbeat installer
+        * windows-install-auditbeat.ps1 -- Windows auditbeat installer
+        * windows-install-filebeat.ps1 -- Windows filebeat installer
+        * windows-install-packetbeat.ps1 -- Windows packetbeat installer
 
 
 ## Caveats
@@ -145,6 +194,12 @@ Unlike other beat shippers, currently there is no way of generating the winlogbe
 replacing the 7.9.0 on the $VERSION= line with your ELK version.
 
 You should copy the generated template file to ./conf/winlogbeat/
+
+## Contact
+
+Latest version: https://github.com/dirtyfilthy/siem-from-scratch
+
+Contact me (Caleb Anderson): dirtyfilthee@gmail.com
 
 
 

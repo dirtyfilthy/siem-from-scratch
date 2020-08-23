@@ -5,6 +5,21 @@ SIEM_IP=$2
 
 . /vagrant/siem/conf/siem/config.sh
 
+if [ -z "$SIEM_IP" ] || [ -z "$SIEM_CN" ]; then
+	echo "[!] ERROR: this provisioning script requires both the SIEM IP and SIEM hostname arguments to function!"
+	echo "[!] either pass the \"args\" parameter with the SIEM_IP and SIEM_CN variables or directly"
+	echo "[!] with \"hostname\" and \"1.2.3.4\" like this:"
+	echo "[!] "
+	echo "[!] cfg.vm.provision \"shell\", path: \"siem/scripts/debian-check-siem-certs.sh\", args: [SIEM_CN, SIEM_IP]"
+	echo "[!] "
+	echo "[!] or"
+	echo "[!] "
+	echo "[!] cfg.vm.provision \"shell\", path: \"siem/scripts/debian-check-siem-certss.sh\", args: [\"hostname\", \"1.2.3.4\"]"
+	echo "[!] "
+	echo "[!] exiting due to error!"
+	exit 1
+fi
+
 echo "[+] checking certs..."
 
 if [ "$ROOTCERT" != "$DEFAULT_ROOTCERT" ] && ! [ -f "$ROOTCERT" ]; then
