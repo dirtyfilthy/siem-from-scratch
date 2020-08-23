@@ -21,7 +21,7 @@ Assuming the machine image exists and the resources have already been downloaded
 
 ## Prerequisites
 
-As the shell scripts and necessary tools are run the created SIEM box itself, this software has limited requirements:
+As the shell scripts and necessary tools are run on the created SIEM box itself, this software has limited requirements:
 
 * Vagrant
 * Vagrant project folder shared under "/vagrant" or "C:\Vagrant" (this is usually the case by default)
