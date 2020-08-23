@@ -141,7 +141,7 @@ If you want to use your own root certificate, you will need edit conf/siem/confi
 
 ## Activities
 
-The VagrantFile will perform the following actions:
+The provisioning scripts will perform the following actions:
 
 * create a root certificate and a create a signed sub certificate 
 * download all required files (such as elasticsearch .deb packages etc) into ./resources
