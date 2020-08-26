@@ -207,7 +207,7 @@ Unlike other beat shippers, currently there is no way of generating the winlogbe
 
 replacing the 7.9.0 on the $VERSION= line with your ELK version.
 
-You should copy the generated template file to ./conf/winlogbeat/
+You should copy the generated template file to .siem/conf/winlogbeat/
 
 ## TODO
 

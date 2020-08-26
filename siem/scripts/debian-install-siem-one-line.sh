@@ -32,5 +32,8 @@ fi
 /vagrant/siem/scripts/debian-upgrade.sh
 /vagrant/siem/scripts/debian-install-java11.sh
 /vagrant/siem/scripts/debian-check-siem-resources.sh
-/vagrant/siem/scripts/debian-check-siem-certs.sh $SIEM_CN $SIEM_IP
+if ! /vagrant/siem/scripts/debian-check-siem-certs.sh $SIEM_CN $SIEM_IP; then
+	echo "[!] debian-check-siem-certs.sh failed, exiting..."
+	exit 1
+fi
 /vagrant/siem/scripts/debian-install-siem.sh $SIEM_CN $SIEM_IP

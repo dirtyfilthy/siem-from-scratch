@@ -1,13 +1,16 @@
 #!/bin/sh
 
-### CONFIG
 
-. /vagrant/siem/conf/siem/config.sh
 
 ### PARAMS
 
 SIEM_CN=$1
 SIEM_IP=$2
+
+### CONFIG
+
+. /vagrant/siem/conf/siem/config.sh
+. /vagrant/siem/helpers/set-certs.sh
 
 ### FUNCTIONS
 
@@ -196,7 +199,7 @@ echo "elasticsearch.username: \"kibana_system\"" >> /etc/kibana/kibana.yml
 echo "elasticsearch.password: \"$KIBANAPW\"" >> /etc/kibana/kibana.yml
 
 echo [+] enable kibana TLS
-cp /vagrant/siem/certs/siem/elastic-certificates.p12 /usr/share/elasticsearch/
+cp $ELASTICSEARCH_P12 /usr/share/elasticsearch/elastic-certificates.p12
 chmod +r /usr/share/elasticsearch/elastic-certificates.p12
 echo 'server.ssl.keystore.path: "/usr/share/elasticsearch/elastic-certificates.p12"' >> /etc/kibana/kibana.yml
 echo 'server.ssl.enabled: true' >> /etc/kibana/kibana.yml
