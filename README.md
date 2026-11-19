@@ -1,3 +1,5 @@
+**Status:** not actively developed. I'm not fixing bugs or adding features, but I'll look at pull requests when I can. Forks welcome.
+
 
        .dMMMb  dMP dMMMMMP dMMMMMMMMb         dMMMMMP dMMMMb  .aMMMb  dMMMMMMMMb 
       dMP" VP amr dMP     dMP"dMP"dMP        dMP     dMP.dMP dMP"dMP dMP"dMP"dMP 
